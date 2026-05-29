@@ -1,0 +1,4 @@
+﻿datetime;event;people_now;total_people;active_person_ids;visible_face_count;visible_body_count;comment
+2026-05-29 06:23:16;program_start;0;0;;0;0;v2 запущена
+2026-05-29 06:23:17;count_and_total_changed;1;1;1;1;1;"now: 0→1; total: 0→1"
+2026-05-29 06:23:35;exit;1;1;1;1;1;Выход

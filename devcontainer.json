@@ -1,0 +1,33 @@
+{
+  "name": "People Counter v2",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+
+  // Монтируем папки проекта в контейнер
+  "mounts": [
+    "source=${localWorkspaceFolder}/logs,target=/app/logs,type=bind,consistency=delegated",
+    "source=${localWorkspaceFolder}/models,target=/app/models,type=bind,consistency=delegated",
+    "source=${localWorkspaceFolder}/screenshots,target=/app/screenshots,type=bind,consistency=delegated"
+  ],
+
+  // Расширения VS Code внутри контейнера
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pylint",
+        "ms-python.black-formatter"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true,
+        "python.formatting.provider": "black"
+      }
+    }
+  },
+
+  // Команда после запуска контейнера
+  "postCreateCommand": "echo 'Контейнер готов. Запусти: python people_counter_v2.py --source video.mp4'"
+}
