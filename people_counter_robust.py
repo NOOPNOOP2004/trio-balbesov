@@ -27,6 +27,7 @@
 
 import cv2
 import csv
+import os
 import time
 import math
 import argparse
@@ -34,6 +35,9 @@ import platform
 import urllib.request
 from pathlib import Path
 from datetime import datetime
+
+# HEADLESS=1 (env) — отключает cv2.imshow/waitKey для запуска в Docker без дисплея
+HEADLESS = os.environ.get("HEADLESS", "0") == "1"
 
 import numpy as np
 import mediapipe as mp
@@ -950,22 +954,24 @@ def main():
         # Отрисовка (на оригинальном кадре, не на proc_frame)
         frame = draw_interface(frame, faces, body_tracks, counter, stats, fps, debug_mode)
 
-        cv2.imshow("People Counter v2", frame)
         last_stats = stats
 
-        key = cv2.waitKey(1) & 0xFF
-
-        if key in (ord("q"), ord("й"), 27):
-            break
-        elif key in (ord("r"), ord("к")):
-            counter.reset()
-            print("[INFO] Сброс.")
-            append_csv("reset", 0, 0, [], 0, 0, "Сброс")
-        elif key in (ord("s"), ord("ы")):
-            save_screenshot(frame)
-        elif key in (ord("d"), ord("в")):
-            debug_mode = not debug_mode
-            print(f"[INFO] DEBUG: {'ON' if debug_mode else 'OFF'}")
+        if not HEADLESS:
+            # GUI-режим: показываем окно и читаем клавиши
+            cv2.imshow("People Counter v2", frame)
+            key = cv2.waitKey(1) & 0xFF
+            if key in (ord("q"), ord("й"), 27):
+                break
+            elif key in (ord("r"), ord("к")):
+                counter.reset()
+                print("[INFO] Сброс.")
+                append_csv("reset", 0, 0, [], 0, 0, "Сброс")
+            elif key in (ord("s"), ord("ы")):
+                save_screenshot(frame)
+            elif key in (ord("d"), ord("в")):
+                debug_mode = not debug_mode
+                print(f"[INFO] DEBUG: {'ON' if debug_mode else 'OFF'}")
+        # HEADLESS=1 (Docker): окно не открываем, выход по концу файла
 
     append_csv("exit", last_stats["people_now"], last_stats["total_people"],
                last_stats["active_person_ids"], last_stats["visible_face_count"],
@@ -973,7 +979,8 @@ def main():
 
     face_detector.close()
     cap.release()
-    cv2.destroyAllWindows()
+    if not HEADLESS:
+        cv2.destroyAllWindows()
 
     print("\n========== ГОТОВО ==========")
     print(f"Всего людей: {counter.total_people}")

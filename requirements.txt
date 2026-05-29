@@ -1,4 +1,4 @@
-opencv-python
-numpy
-mediapipe
-ultralytics
+opencv-python-headless==4.8.1.78
+mediapipe==0.10.9
+ultralytics==8.0.207
+numpy==1.24.3

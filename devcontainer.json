@@ -29,5 +29,5 @@
   },
 
   // Команда после запуска контейнера
-  "postCreateCommand": "echo 'Контейнер готов. Запусти: python people_counter_v2.py --source video.mp4'"
+  "postCreateCommand": "pip install -r requirements.txt && echo 'Контейнер готов. Запусти: python people_counter_robust.py --source video.mp4'"
 }

@@ -1,28 +1,36 @@
-version: '3.8'
-
 services:
   people-counter:
     build: .
-    container_name: people_counter_v2
-    network_mode: host  # Для доступа к камере
-    devices:
-      - /dev/video0:/dev/video0  # Проброс камеры
-      - /dev/video1:/dev/video1  # Если есть вторая камера
+    container_name: people-counter
+    environment:
+      # ИСПРАВЛЕНО: headless-режим — cv2.imshow не вызывается, нет краша без дисплея
+      - HEADLESS=1
     volumes:
       - ./logs:/app/logs
       - ./screenshots:/app/screenshots
       - ./models:/app/models
-      # Для проброса видеофайла (опционально)
-      - ./videos:/app/videos
+      # Положи видеофайл рядом с docker-compose.yml и он будет доступен внутри
+      - ./video.mp4:/app/video.mp4:ro
+    stdin_open: true
+    tty: true
+    # Запуск с видеофайлом. Для камеры — см. профиль "camera" ниже.
+    command: python people_counter_robust.py --source video.mp4 --no-multiscale
+
+  # Профиль для запуска с веб-камерой (только Linux-хост):
+  #   docker compose --profile camera up people-counter-cam
+  people-counter-cam:
+    profiles: ["camera"]
+    build: .
+    container_name: people-counter-cam
     environment:
-      - PYTHONUNBUFFERED=1
-      - OPENCV_VIDEOIO_DEBUG=1
-    # Для отображения GUI (опционально, требует X11)
-    # environment:
-    #   - DISPLAY=${DISPLAY}
-    #   - QT_X11_NO_MITSHM=1
-    # volumes:
-    #   - /tmp/.X11-unix:/tmp/.X11-unix
-    # stdin_open: true
-    # tty: true
-    command: python people_counter_robust.py --camera 0
+      - HEADLESS=1
+    volumes:
+      - ./logs:/app/logs
+      - ./screenshots:/app/screenshots
+      - ./models:/app/models
+    devices:
+      # ИСПРАВЛЕНО: явный проброс устройства камеры — без этого --camera 0 не работает
+      - /dev/video0:/dev/video0
+    stdin_open: true
+    tty: true
+    command: python people_counter_robust.py --camera 0 --no-multiscale
