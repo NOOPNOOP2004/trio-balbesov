@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  people-counter:
+    build: .
+    container_name: people_counter_v2
+    network_mode: host  # Для доступа к камере
+    devices:
+      - /dev/video0:/dev/video0  # Проброс камеры
+      - /dev/video1:/dev/video1  # Если есть вторая камера
+    volumes:
+      - ./logs:/app/logs
+      - ./screenshots:/app/screenshots
+      - ./models:/app/models
+      # Для проброса видеофайла (опционально)
+      - ./videos:/app/videos
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENCV_VIDEOIO_DEBUG=1
+    # Для отображения GUI (опционально, требует X11)
+    # environment:
+    #   - DISPLAY=${DISPLAY}
+    #   - QT_X11_NO_MITSHM=1
+    # volumes:
+    #   - /tmp/.X11-unix:/tmp/.X11-unix
+    # stdin_open: true
+    # tty: true
+    command: python people_counter_robust.py --camera 0
